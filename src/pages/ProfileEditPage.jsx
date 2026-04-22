@@ -87,8 +87,8 @@ export default function ProfileEditPage() {
                     value={form?.[field.name] || ''}
                     onChange={handleChange}
                     readOnly={field.name === 'email'}
-                    className={`w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent ${
-                      field.name === 'email' ? 'bg-gray-50 text-gray-500 cursor-not-allowed' : ''
+                    className={`w-full px-4 py-2.5 rounded-xl border border-gray-300 text-sm text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:border-transparent ${
+                      field.name === 'email' ? 'bg-gray-50 !text-gray-500 cursor-not-allowed' : ''
                     }`}
                     placeholder={field.label}
                   />

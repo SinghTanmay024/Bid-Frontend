@@ -95,7 +95,7 @@ function StatusBadge({ status }) {
 }
 
 /* ── Main product card ── */
-export default function ProductCard({ product, style }) {
+export default function ProductCard({ product, style, onBidClick }) {
   const { userId } = useAuthStore();
   const navigate = useNavigate();
   const isCompleted = product.status === 'COMPLETED';
@@ -106,7 +106,7 @@ export default function ProductCard({ product, style }) {
       navigate('/login');
       return;
     }
-    navigate(`/products/${product.id}`);
+    if (onBidClick) onBidClick();
   };
 
   return (

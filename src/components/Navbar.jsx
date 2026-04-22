@@ -83,6 +83,12 @@ export default function Navbar() {
                 My Bids
               </Link>
             )}
+            <Link
+              to="/products/add"
+              className="text-sm font-semibold px-4 py-1.5 rounded-lg bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white hover:opacity-90 transition-opacity shadow-md shadow-indigo-500/20"
+            >
+              + Add Product
+            </Link>
           </div>
 
           {/* ── Right side ── */}
@@ -181,6 +187,9 @@ export default function Navbar() {
                 My Bids
               </Link>
             )}
+            <Link to="/products/add" className="px-3 py-2.5 rounded-lg text-sm font-semibold text-white bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-center hover:opacity-90 transition-opacity">
+              + Add Product
+            </Link>
             <div className="border-t border-white/[0.06] my-2" />
             {userId ? (
               <>

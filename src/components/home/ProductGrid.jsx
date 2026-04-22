@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { getOpenProducts } from '../../api/products';
 import ProductCard from './ProductCard';
 import SkeletonCard from './SkeletonCard';
+import BidModal from '../BidModal';
 
 const SKELETON_COUNT = 6;
 
@@ -24,7 +25,6 @@ function ErrorBanner({ onRetry }) {
 function EmptyState() {
   return (
     <div className="flex flex-col items-center justify-center py-24 gap-5">
-      {/* Illustration */}
       <div className="relative">
         <div
           className="absolute inset-0 rounded-full blur-2xl opacity-30"
@@ -35,13 +35,15 @@ function EmptyState() {
       <div className="text-center">
         <h3 className="text-xl font-semibold text-white mb-2">No live bids right now</h3>
         <p className="text-[#9CA3AF] text-sm max-w-sm">
-          Check back soon — new products drop daily! Subscribe to get notified when new bids open.
+          Check back soon — new products drop daily!
         </p>
       </div>
-      <div className="flex items-center gap-2 px-4 py-2 rounded-full bg-[#6366F1]/10 border border-[#6366F1]/20 text-[#A5B4FC] text-sm">
-        <span className="animate-pulse">🔔</span>
-        New products coming soon
-      </div>
+      <Link
+        to="/products/add"
+        className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25"
+      >
+        + Add First Product
+      </Link>
     </div>
   );
 }
@@ -50,6 +52,7 @@ export default function ProductGrid() {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [selectedProduct, setSelectedProduct] = useState(null);
 
   const load = () => {
     setLoading(true);
@@ -62,51 +65,64 @@ export default function ProductGrid() {
 
   useEffect(() => { load(); }, []);
 
+  // When a bid succeeds, refresh the product in the list
+  const handleBidSuccess = (updatedProduct) => {
+    setProducts((prev) =>
+      prev.map((p) => (p.id === updatedProduct.id ? updatedProduct : p))
+    );
+    // If product is now completed, remove from open list after a short delay
+    if (updatedProduct.status === 'COMPLETED') {
+      setTimeout(() => {
+        setProducts((prev) => prev.filter((p) => p.id !== updatedProduct.id));
+      }, 3000);
+    }
+  };
+
   return (
     <section id="products" className="py-20 px-4 sm:px-6 lg:px-8">
       <div className="max-w-7xl mx-auto">
 
-        {/* ── Section header ── */}
+        {/* Section header */}
         <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
           <div>
-            <h2 className="text-3xl font-bold text-white mb-2">
-              🔥 Live Bids
-            </h2>
-            <p className="text-[#9CA3AF]">Grab your slot before it&apos;s gone</p>
+            <h2 className="text-3xl font-bold text-white mb-2">🔥 Live Bids</h2>
+            <p className="text-[#9CA3AF]">Grab your slot before it's gone</p>
           </div>
-          {!loading && !error && products.length > 0 && (
+          <div className="flex items-center gap-3">
             <Link
-              to="/"
-              className="flex items-center gap-1.5 text-sm text-[#6366F1] hover:text-[#A5B4FC] transition-colors font-medium"
+              to="/products/add"
+              className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white text-sm font-semibold hover:opacity-90 transition-opacity shadow-lg shadow-indigo-500/25"
             >
-              View All Products
-              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              + Add Product
             </Link>
-          )}
+            {!loading && !error && products.length > 0 && (
+              <Link
+                to="/"
+                className="flex items-center gap-1.5 text-sm text-[#6366F1] hover:text-[#A5B4FC] transition-colors font-medium"
+              >
+                View All
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </Link>
+            )}
+          </div>
         </div>
 
-        {/* ── Error banner ── */}
-        {error && (
-          <div className="mb-6">
-            <ErrorBanner onRetry={load} />
-          </div>
-        )}
+        {/* Error */}
+        {error && <div className="mb-6"><ErrorBanner onRetry={load} /></div>}
 
-        {/* ── Loading skeletons ── */}
+        {/* Skeletons */}
         {loading && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {Array.from({ length: SKELETON_COUNT }).map((_, i) => (
-              <SkeletonCard key={i} />
-            ))}
+            {Array.from({ length: SKELETON_COUNT }).map((_, i) => <SkeletonCard key={i} />)}
           </div>
         )}
 
-        {/* ── Empty state ── */}
+        {/* Empty */}
         {!loading && !error && products.length === 0 && <EmptyState />}
 
-        {/* ── Product grid ── */}
+        {/* Grid */}
         {!loading && !error && products.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {products.map((product, i) => (
@@ -114,12 +130,13 @@ export default function ProductGrid() {
                 key={product.id}
                 product={product}
                 style={{ animationDelay: `${i * 80}ms` }}
+                onBidClick={() => setSelectedProduct(product)}
               />
             ))}
           </div>
         )}
 
-        {/* ── View all link ── */}
+        {/* View all */}
         {!loading && !error && products.length > 0 && (
           <div className="mt-12 text-center">
             <Link
@@ -134,6 +151,15 @@ export default function ProductGrid() {
           </div>
         )}
       </div>
+
+      {/* Bid Modal */}
+      {selectedProduct && (
+        <BidModal
+          product={selectedProduct}
+          onClose={() => setSelectedProduct(null)}
+          onBidSuccess={handleBidSuccess}
+        />
+      )}
     </section>
   );
 }

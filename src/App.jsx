@@ -1,14 +1,17 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
+import Footer from './components/Footer';
 import ProtectedRoute from './components/ProtectedRoute';
 import RegisterPage from './pages/RegisterPage';
 import LoginPage from './pages/LoginPage';
 import ProfileSetupPage from './pages/ProfileSetupPage';
 import ProfileEditPage from './pages/ProfileEditPage';
+import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import MyBidsPage from './pages/MyBidsPage';
+import AddProductPage from './pages/AddProductPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
 
@@ -64,12 +67,15 @@ export default function App() {
               }
             />
 
+            {/* Add product */}
+            <Route path="/products/add" element={<AddProductPage />} />
+
             {/* Public info pages */}
             <Route path="/how-it-works" element={<HowItWorksPage />} />
             <Route path="/contact" element={<ContactPage />} />
 
-            {/* Product pages — public (bidding requires auth) */}
-            <Route path="/" element={<ProductListingPage />} />
+            {/* Home — full landing page with hero, marketing, products */}
+            <Route path="/" element={<HomePage />} />
             <Route path="/products" element={<Navigate to="/" replace />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
 
@@ -77,6 +83,7 @@ export default function App() {
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>
+        <Footer />
       </div>
     </BrowserRouter>
   );

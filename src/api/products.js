@@ -8,3 +8,6 @@ export const getAllProducts = () =>
 
 export const getProduct = (id) =>
   api.get(`/api/products/${id}`);
+
+export const createProduct = (productData) =>
+  api.post('/api/products', productData);
