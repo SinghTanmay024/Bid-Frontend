@@ -53,6 +53,7 @@ export default function ProductGrid() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const load = () => {
     setLoading(true);
@@ -64,6 +65,15 @@ export default function ProductGrid() {
   };
 
   useEffect(() => { load(); }, []);
+
+  const filteredProducts = products.filter((p) => {
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return true;
+    return (
+      p.name?.toLowerCase().includes(q) ||
+      p.description?.toLowerCase().includes(q)
+    );
+  });
 
   // When a bid succeeds, refresh the product in the list
   const handleBidSuccess = (updatedProduct) => {
@@ -83,7 +93,7 @@ export default function ProductGrid() {
       <div className="max-w-7xl mx-auto">
 
         {/* Section header */}
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-10">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-4 mb-6">
           <div>
             <h2 className="text-3xl font-bold text-white mb-2">🔥 Live Bids</h2>
             <p className="text-[#9CA3AF]">Grab your slot before it's gone</p>
@@ -109,6 +119,35 @@ export default function ProductGrid() {
           </div>
         </div>
 
+        {/* Search bar */}
+        {!loading && !error && products.length > 0 && (
+          <div className="relative mb-8 max-w-lg">
+            <div className="absolute inset-y-0 left-3.5 flex items-center pointer-events-none">
+              <svg className="w-4 h-4 text-[#6366F1]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-4.35-4.35M17 11A6 6 0 1 1 5 11a6 6 0 0 1 12 0z" />
+              </svg>
+            </div>
+            <input
+              type="text"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              placeholder="Search products to bid on…"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl bg-white/5 border border-white/10 text-[#E5E7EB] placeholder-[#6B7280] text-sm focus:outline-none focus:border-[#6366F1]/60 focus:bg-white/8 transition-all"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute inset-y-0 right-3 flex items-center text-[#6B7280] hover:text-white transition-colors"
+                aria-label="Clear search"
+              >
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            )}
+          </div>
+        )}
+
         {/* Error */}
         {error && <div className="mb-6"><ErrorBanner onRetry={load} /></div>}
 
@@ -119,13 +158,32 @@ export default function ProductGrid() {
           </div>
         )}
 
-        {/* Empty */}
+        {/* Empty — no products at all */}
         {!loading && !error && products.length === 0 && <EmptyState />}
 
+        {/* Empty — no search results */}
+        {!loading && !error && products.length > 0 && filteredProducts.length === 0 && (
+          <div className="flex flex-col items-center justify-center py-20 gap-4">
+            <span className="text-5xl">🔍</span>
+            <div className="text-center">
+              <h3 className="text-lg font-semibold text-white mb-1">No products found</h3>
+              <p className="text-[#9CA3AF] text-sm">
+                No results for &ldquo;<span className="text-[#A5B4FC]">{searchQuery}</span>&rdquo;. Try a different keyword.
+              </p>
+            </div>
+            <button
+              onClick={() => setSearchQuery('')}
+              className="px-4 py-2 rounded-xl border border-white/10 text-sm text-[#9CA3AF] hover:text-white hover:border-[#6366F1]/40 transition-all"
+            >
+              Clear search
+            </button>
+          </div>
+        )}
+
         {/* Grid */}
-        {!loading && !error && products.length > 0 && (
+        {!loading && !error && filteredProducts.length > 0 && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {products.map((product, i) => (
+            {filteredProducts.map((product, i) => (
               <ProductCard
                 key={product.id}
                 product={product}

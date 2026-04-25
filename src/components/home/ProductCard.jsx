@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { useAuthStore } from '../../store/authStore';
+import { useFavoritesStore } from '../../store/favoritesStore';
 
 /* ── Animated progress bar ── */
 function AnimatedProgressBar({ completed, total }) {
@@ -94,6 +95,52 @@ function StatusBadge({ status }) {
   );
 }
 
+/* ── Heart / Favourite button ── */
+function HeartButton({ productId }) {
+  const { userId } = useAuthStore();
+  const { isFavorite, toggleFavorite } = useFavoritesStore();
+  const [animating, setAnimating] = useState(false);
+  const favorited = isFavorite(productId);
+
+  const handleClick = (e) => {
+    e.stopPropagation();
+    if (!userId) {
+      toast.error('Please log in to save favourites');
+      return;
+    }
+    const added = toggleFavorite(productId, userId);
+    setAnimating(true);
+    setTimeout(() => setAnimating(false), 300);
+    if (added) {
+      toast.success('Added to favourites ❤️');
+    } else {
+      toast('Removed from favourites', { icon: '🤍' });
+    }
+  };
+
+  return (
+    <button
+      onClick={handleClick}
+      aria-label={favorited ? 'Remove from favourites' : 'Add to favourites'}
+      className={`flex items-center justify-center w-8 h-8 rounded-full backdrop-blur-sm transition-all duration-200
+        ${favorited
+          ? 'bg-red-500/20 border border-red-400/40 hover:bg-red-500/30'
+          : 'bg-white/10 border border-white/20 hover:bg-white/20'}
+        ${animating ? 'scale-125' : 'scale-100'}`}
+    >
+      {favorited ? (
+        <svg className="w-4 h-4 text-red-400 fill-red-400" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      ) : (
+        <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+        </svg>
+      )}
+    </button>
+  );
+}
+
 /* ── Main product card ── */
 export default function ProductCard({ product, style, onBidClick }) {
   const { userId } = useAuthStore();
@@ -117,6 +164,10 @@ export default function ProductCard({ product, style, onBidClick }) {
       {/* ── Image ── */}
       <div className="relative h-48 overflow-hidden shrink-0">
         <ProductImage src={product.imageUrl} alt={product.name} />
+        {/* Heart button — top left */}
+        <div className="absolute top-3 left-3">
+          <HeartButton productId={product.id} />
+        </div>
         {/* Status badge overlay */}
         <div className="absolute top-3 right-3">
           <StatusBadge status={product.status} />

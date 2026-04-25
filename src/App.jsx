@@ -1,3 +1,4 @@
+import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
 import Navbar from './components/Navbar';
@@ -11,9 +12,27 @@ import HomePage from './pages/HomePage';
 import ProductListingPage from './pages/ProductListingPage';
 import ProductDetailPage from './pages/ProductDetailPage';
 import MyBidsPage from './pages/MyBidsPage';
+import FavouritesPage from './pages/FavouritesPage';
 import AddProductPage from './pages/AddProductPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
+import { useAuthStore } from './store/authStore';
+import { useFavoritesStore } from './store/favoritesStore';
+
+function AppContent() {
+  const { userId } = useAuthStore();
+  const { hydrate, clearFavorites } = useFavoritesStore();
+
+  useEffect(() => {
+    if (userId) {
+      hydrate(userId);
+    } else {
+      clearFavorites();
+    }
+  }, [userId, hydrate, clearFavorites]);
+
+  return null;
+}
 
 export default function App() {
   return (
@@ -33,6 +52,7 @@ export default function App() {
         }}
       />
 
+      <AppContent />
       <div className="min-h-screen flex flex-col">
         <Navbar />
         <main className="flex-1">
@@ -63,6 +83,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <MyBidsPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/favourites"
+              element={
+                <ProtectedRoute>
+                  <FavouritesPage />
                 </ProtectedRoute>
               }
             />
