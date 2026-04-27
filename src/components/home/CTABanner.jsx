@@ -15,57 +15,62 @@ export default function CTABanner() {
   };
 
   return (
-    <section className="py-4 px-4 sm:px-6 lg:px-8">
+    <section className="py-16 px-5 sm:px-8">
       <div className="max-w-5xl mx-auto">
         <div
-          className="relative rounded-3xl overflow-hidden px-8 py-16 text-center"
+          className="relative rounded-2xl overflow-hidden px-8 py-16 sm:py-20 text-center"
           style={{
-            background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 30%, #4c1d95 70%, #2e1065 100%)',
+            background: 'linear-gradient(135deg, #0E0E1A 0%, #14143A 40%, #1A103A 100%)',
+            border: '1px solid rgba(91,95,239,0.2)',
           }}
         >
-          {/* Background orbs */}
+          {/* Subtle top glow */}
           <div
-            className="absolute top-0 left-0 w-72 h-72 rounded-full pointer-events-none orb-float-slow"
+            className="absolute top-0 left-1/2 -translate-x-1/2 pointer-events-none"
             style={{
-              background: 'radial-gradient(circle, rgba(99,102,241,0.3) 0%, transparent 70%)',
-              transform: 'translate(-40%, -40%)',
-            }}
-          />
-          <div
-            className="absolute bottom-0 right-0 w-56 h-56 rounded-full pointer-events-none orb-float-fast"
-            style={{
-              background: 'radial-gradient(circle, rgba(168,85,247,0.25) 0%, transparent 70%)',
-              transform: 'translate(30%, 30%)',
+              width: 600,
+              height: 250,
+              background: 'radial-gradient(ellipse at 50% 0%, rgba(91,95,239,0.25) 0%, transparent 70%)',
             }}
           />
 
           {/* Content */}
           <div className="relative z-10">
-            <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 text-white/80 text-sm mb-6">
-              <span className="animate-pulse">✨</span>
-              Join thousands of lucky winners
+            <div
+              className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full mb-6 text-xs font-semibold tracking-wide uppercase"
+              style={{ background: 'rgba(91,95,239,0.15)', border: '1px solid rgba(91,95,239,0.25)', color: '#7477F5' }}
+            >
+              <span className="w-1.5 h-1.5 rounded-full bg-[#5B5FEF] animate-pulse" />
+              Join thousands of winners
             </div>
 
             <h2
-              className="font-bold text-white mb-4 leading-tight"
-              style={{ fontSize: 'clamp(1.75rem, 5vw, 2.75rem)' }}
+              className="font-bold text-white leading-tight mb-4 tracking-tight"
+              style={{ fontSize: 'clamp(1.75rem, 5vw, 3rem)' }}
             >
               Ready to win your first product?
             </h2>
-            <p className="text-white/70 text-lg mb-8 max-w-xl mx-auto">
-              Join thousands of bidders and claim your slot today. One bid. One winner. Your turn.
+
+            <p className="text-[#A0A0AB] text-base mb-10 max-w-md mx-auto leading-relaxed">
+              One bid. One winner. Your slot is waiting — claim it before someone else does.
             </p>
 
             <button
               onClick={handleCTA}
-              className="btn-glow inline-flex items-center gap-2 px-8 py-4 rounded-xl bg-white text-[#312e81] font-bold text-[15px] hover:bg-white/90 transition-all hover:scale-[1.03] shadow-2xl shadow-black/30 active:scale-[0.98]"
+              className="inline-flex items-center gap-2.5 px-8 py-3.5 rounded-xl text-white font-semibold text-[15px] transition-all hover:opacity-90 active:scale-[0.98]"
+              style={{
+                background: '#5B5FEF',
+                boxShadow: '0 4px 24px rgba(91,95,239,0.4)',
+              }}
             >
-              🚀 Start Bidding Now
+              Start Bidding Now
+              <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17 8l4 4m0 0l-4 4m4-4H3" />
+              </svg>
             </button>
 
-            {/* Trust micro-line */}
-            <p className="mt-4 text-white/40 text-xs">
-              No subscription · Fixed bid price · Fair random draw
+            <p className="mt-5 text-xs text-[#6B6B78]">
+              No subscription · Fixed bid price · Certified fair draw
             </p>
           </div>
         </div>

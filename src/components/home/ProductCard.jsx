@@ -16,7 +16,6 @@ function AnimatedProgressBar({ completed, total }) {
       ([entry]) => {
         if (entry.isIntersecting && !observed.current) {
           observed.current = true;
-          // Tiny delay so CSS transition fires after mount
           requestAnimationFrame(() => setWidth(pct));
         }
       },
@@ -27,39 +26,43 @@ function AnimatedProgressBar({ completed, total }) {
   }, [pct]);
 
   const remaining = total - completed;
+  const urgency = pct >= 80 ? 'high' : pct >= 50 ? 'mid' : 'low';
+  const barColor =
+    urgency === 'high' ? '#EF4444' :
+    urgency === 'mid'  ? '#F5A623' : '#5B5FEF';
 
   return (
-    <div ref={barRef}>
-      <div className="flex justify-between text-xs text-[#9CA3AF] mb-1.5">
-        <span className="font-medium text-[#E5E7EB]">{completed} / {total} slots filled</span>
-        <span>{Math.round(pct)}%</span>
+    <div ref={barRef} className="flex flex-col gap-2">
+      <div className="flex justify-between items-center text-xs">
+        <span className="text-[#6B6B78]">{completed} / {total} slots filled</span>
+        <span className="font-semibold" style={{ color: barColor }}>{Math.round(pct)}%</span>
       </div>
-      <div className="w-full h-2.5 rounded-full bg-white/10 overflow-hidden">
+      <div className="w-full h-1.5 rounded-full bg-[rgba(255,255,255,0.06)] overflow-hidden">
         <div
           className="h-full rounded-full transition-all duration-700 ease-out"
-          style={{
-            width: `${width}%`,
-            background: 'linear-gradient(90deg, #6366F1, #A855F7)',
-          }}
+          style={{ width: `${width}%`, background: barColor }}
         />
       </div>
-      <p className="text-xs text-[#9CA3AF] mt-1">
-        <span className="font-semibold text-[#E5E7EB]">{remaining}</span>{' '}
+      <p className="text-xs text-[#6B6B78]">
+        <span className="font-semibold text-[#A0A0AB]">{remaining}</span>{' '}
         slot{remaining !== 1 ? 's' : ''} remaining
       </p>
     </div>
   );
 }
 
-/* ── Image with fallback ── */
+/* ── Image fallback ── */
 function ProductImage({ src, alt }) {
   const [imgError, setImgError] = useState(false);
 
   if (!src || imgError) {
     return (
-      <div className="w-full h-full flex flex-col items-center justify-center gap-2 bg-gradient-to-br from-[#1a1f35] to-[#111827]">
-        <span className="text-5xl opacity-40">📦</span>
-        <span className="text-xs text-[#9CA3AF] opacity-60">No image</span>
+      <div className="w-full h-full flex flex-col items-center justify-center gap-2"
+        style={{ background: 'linear-gradient(135deg, #111114, #18181C)' }}>
+        <svg className="w-10 h-10 text-[#2A2A32]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+          <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 3h18M3 21h18" />
+        </svg>
+        <span className="text-xs text-[#3A3A45]">No image</span>
       </div>
     );
   }
@@ -68,7 +71,7 @@ function ProductImage({ src, alt }) {
     <img
       src={src}
       alt={alt}
-      className="w-full h-full object-cover"
+      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-[1.03]"
       onError={() => setImgError(true)}
     />
   );
@@ -78,70 +81,60 @@ function ProductImage({ src, alt }) {
 function StatusBadge({ status }) {
   const isOpen = status === 'OPEN';
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold ${
-        isOpen
-          ? 'bg-[#10B981]/15 text-[#10B981] border border-[#10B981]/30'
-          : 'bg-[#9CA3AF]/15 text-[#9CA3AF] border border-[#9CA3AF]/20'
-      }`}
-    >
-      <span
-        className={`w-1.5 h-1.5 rounded-full ${
-          isOpen ? 'bg-[#10B981] animate-pulse' : 'bg-[#9CA3AF]'
-        }`}
-      />
-      {isOpen ? 'OPEN' : 'COMPLETED'}
+    <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-[11px] font-semibold uppercase tracking-wide ${
+      isOpen
+        ? 'bg-[rgba(34,197,94,0.12)] text-[#4ADE80] border border-[rgba(34,197,94,0.2)]'
+        : 'bg-[rgba(107,107,120,0.15)] text-[#6B6B78] border border-[rgba(107,107,120,0.2)]'
+    }`}>
+      <span className={`w-1.5 h-1.5 rounded-full ${isOpen ? 'bg-[#22C55E] animate-pulse' : 'bg-[#6B6B78]'}`} />
+      {isOpen ? 'Live' : 'Ended'}
     </span>
   );
 }
 
-/* ── Heart / Favourite button ── */
+/* ── Heart button ── */
 function HeartButton({ productId }) {
   const { userId } = useAuthStore();
   const { isFavorite, toggleFavorite } = useFavoritesStore();
   const [animating, setAnimating] = useState(false);
   const favorited = isFavorite(productId);
 
-  const handleClick = (e) => {
+  const handleClick = async (e) => {
     e.stopPropagation();
     if (!userId) {
       toast.error('Please log in to save favourites');
       return;
     }
-    const added = toggleFavorite(productId, userId);
     setAnimating(true);
     setTimeout(() => setAnimating(false), 300);
-    if (added) {
-      toast.success('Added to favourites ❤️');
-    } else {
-      toast('Removed from favourites', { icon: '🤍' });
-    }
+    const added = await toggleFavorite(productId);
+    if (added) toast.success('Added to favourites ❤️');
+    else toast('Removed from favourites', { icon: '🤍' });
   };
 
   return (
     <button
       onClick={handleClick}
       aria-label={favorited ? 'Remove from favourites' : 'Add to favourites'}
-      className={`flex items-center justify-center w-8 h-8 rounded-full backdrop-blur-sm transition-all duration-200
-        ${favorited
-          ? 'bg-red-500/20 border border-red-400/40 hover:bg-red-500/30'
-          : 'bg-white/10 border border-white/20 hover:bg-white/20'}
-        ${animating ? 'scale-125' : 'scale-100'}`}
+      className={`flex items-center justify-center w-8 h-8 rounded-full transition-all duration-200 ${
+        favorited
+          ? 'bg-[rgba(239,68,68,0.2)] border border-[rgba(239,68,68,0.3)]'
+          : 'bg-[rgba(0,0,0,0.5)] border border-[rgba(255,255,255,0.1)] hover:bg-[rgba(0,0,0,0.7)]'
+      } ${animating ? 'scale-125' : 'scale-100'}`}
     >
-      {favorited ? (
-        <svg className="w-4 h-4 text-red-400 fill-red-400" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-      ) : (
-        <svg className="w-4 h-4 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-          <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-        </svg>
-      )}
+      <svg
+        className={`w-3.5 h-3.5 transition-colors ${favorited ? 'fill-[#EF4444] text-[#EF4444]' : 'fill-none text-white/80'}`}
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+        strokeWidth={2}
+      >
+        <path strokeLinecap="round" strokeLinejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+      </svg>
     </button>
   );
 }
 
-/* ── Main product card ── */
+/* ── Main card ── */
 export default function ProductCard({ product, style, onBidClick }) {
   const { userId } = useAuthStore();
   const navigate = useNavigate();
@@ -158,47 +151,52 @@ export default function ProductCard({ product, style, onBidClick }) {
 
   return (
     <div
-      className="glass-card rounded-2xl overflow-hidden flex flex-col transition-all duration-300 hover:-translate-y-1 animate-fade-up"
+      className="group card-interactive overflow-hidden flex flex-col animate-fade-up"
       style={style}
     >
-      {/* ── Image ── */}
-      <div className="relative h-48 overflow-hidden shrink-0">
+      {/* Image area */}
+      <div className="relative h-48 overflow-hidden bg-[#111114] shrink-0">
         <ProductImage src={product.imageUrl} alt={product.name} />
-        {/* Heart button — top left */}
-        <div className="absolute top-3 left-3">
+
+        {/* Heart — top left */}
+        <div className="absolute top-3 left-3 z-10">
           <HeartButton productId={product.id} />
         </div>
-        {/* Status badge overlay */}
-        <div className="absolute top-3 right-3">
+
+        {/* Status — top right */}
+        <div className="absolute top-3 right-3 z-10">
           <StatusBadge status={product.status} />
         </div>
-        {/* Gradient overlay on bottom of image */}
+
+        {/* Bottom gradient scrim */}
         <div
-          className="absolute bottom-0 left-0 right-0 h-16 pointer-events-none"
-          style={{ background: 'linear-gradient(to bottom, transparent, rgba(17,24,39,0.8))' }}
+          className="absolute inset-x-0 bottom-0 h-20 pointer-events-none"
+          style={{ background: 'linear-gradient(to top, #111114, transparent)' }}
         />
       </div>
 
-      {/* ── Content ── */}
-      <div className="p-5 flex flex-col gap-3 flex-1">
-        {/* Name */}
-        <h3 className="font-semibold text-white text-[18px] leading-snug line-clamp-2">
+      {/* Content */}
+      <div className="flex flex-col gap-3.5 p-5 flex-1">
+
+        {/* Product name */}
+        <h3 className="font-semibold text-white text-base leading-snug line-clamp-2">
           {product.name}
         </h3>
 
         {/* Description */}
         {product.description && (
-          <p className="text-[#9CA3AF] text-sm leading-relaxed line-clamp-2">
+          <p className="text-sm text-[#6B6B78] leading-relaxed line-clamp-2">
             {product.description}
           </p>
         )}
 
-        {/* Bid price */}
-        <div className="flex items-baseline gap-1.5">
-          <span className="text-2xl font-bold text-[#F59E0B]">
-            ₹{product.bidPrice?.toLocaleString('en-IN')}
-          </span>
-          <span className="text-[#9CA3AF] text-sm">per bid</span>
+        {/* Coin cost row */}
+        <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[rgba(245,166,35,0.1)] border border-[rgba(245,166,35,0.2)]">
+            <span className="text-base leading-none">🪙</span>
+            <span className="text-lg font-bold text-[#F5A623]">{product.bidPrice ?? 1}</span>
+            <span className="text-xs text-[#A0A0AB]">coin{(product.bidPrice ?? 1) !== 1 ? 's' : ''} per bid</span>
+          </div>
         </div>
 
         {/* Progress */}
@@ -207,22 +205,25 @@ export default function ProductCard({ product, style, onBidClick }) {
           total={product.totalBidsRequired}
         />
 
-        {/* Spacer */}
         <div className="flex-1" />
 
-        {/* CTA button */}
+        {/* CTA */}
         <button
           onClick={handleBid}
           disabled={isCompleted}
-          className={`w-full py-3 rounded-xl text-sm font-semibold transition-all duration-200 mt-1 ${
+          className={`w-full py-2.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
             isCompleted
-              ? 'bg-white/5 text-[#9CA3AF] cursor-not-allowed border border-white/10'
-              : 'btn-glow bg-gradient-to-r from-[#6366F1] to-[#A855F7] text-white hover:scale-[1.02] shadow-lg shadow-indigo-500/25 active:scale-[0.98]'
+              ? 'bg-[rgba(255,255,255,0.04)] text-[#6B6B78] cursor-not-allowed border border-[rgba(255,255,255,0.06)]'
+              : 'text-white hover:opacity-90 active:scale-[0.98]'
           }`}
+          style={!isCompleted ? {
+            background: '#5B5FEF',
+            boxShadow: '0 2px 12px rgba(91,95,239,0.3)',
+          } : {}}
         >
           {isCompleted
             ? 'Bidding Closed'
-            : `BID NOW — ₹${product.bidPrice?.toLocaleString('en-IN')}`}
+            : `Bid Now — 🪙 ${product.bidPrice ?? 1} coin${(product.bidPrice ?? 1) !== 1 ? 's' : ''}`}
         </button>
       </div>
     </div>

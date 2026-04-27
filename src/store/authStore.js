@@ -17,8 +17,14 @@ export const useAuthStore = create((set) => ({
   ...getInitialState(),
 
   login: (data) => {
-    const { token, email, role } = data;
-    const userId = email; // use email as userId
+    const token = data?.token ?? data?.accessToken ?? null;
+    const email = data?.email ?? null;
+    const role  = data?.role  ?? 'USER';
+    const userId = email;
+    if (!token || !email) {
+      console.error('[authStore] login() received unexpected shape:', data);
+      return;
+    }
     localStorage.setItem('userId', userId);
     localStorage.setItem('email', email);
     localStorage.setItem('token', token);

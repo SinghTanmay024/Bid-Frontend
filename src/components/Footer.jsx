@@ -1,30 +1,19 @@
 import { Link } from 'react-router-dom';
 
-const NAV_LINKS = [
-  { label: 'How It Works', to: '/how-it-works' },
-  { label: 'Contact Us', to: '/contact' },
-  { label: 'FAQ', to: '/how-it-works' },
+const LINKS = [
+  { label: 'How It Works',   to: '/how-it-works' },
+  { label: 'Contact',        to: '/contact' },
   { label: 'Privacy Policy', to: '/contact' },
-  { label: 'Terms', to: '/contact' },
-  { label: 'About Founder', to: '/contact' },
+  { label: 'Terms of Use',   to: '/contact' },
 ];
 
-const SOCIAL_LINKS = [
+const SOCIAL = [
   {
-    label: 'Facebook',
+    label: 'Twitter / X',
     href: '#',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" />
-      </svg>
-    ),
-  },
-  {
-    label: 'Twitter',
-    href: '#',
-    icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-        <path d="M22 4s-.7 2.1-2 3.4c1.6 10-9.4 17.3-18 11.6 2.2.1 4.4-.6 6-2C3 15.5.5 9.6 3 5c2.2 2.6 5.6 4.1 9 4-.9-4.2 4-6.6 7-3.8 1.1 0 3-1.2 3-1.2z" />
+      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
       </svg>
     ),
   },
@@ -32,7 +21,7 @@ const SOCIAL_LINKS = [
     label: 'Instagram',
     href: '#',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <rect x="2" y="2" width="20" height="20" rx="5" ry="5" />
         <circle cx="12" cy="12" r="4" />
         <circle cx="17.5" cy="6.5" r="1" fill="currentColor" strokeWidth="0" />
@@ -43,7 +32,7 @@ const SOCIAL_LINKS = [
     label: 'LinkedIn',
     href: '#',
     icon: (
-      <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
+      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
         <path d="M16 8a6 6 0 016 6v7h-4v-7a2 2 0 00-2-2 2 2 0 00-2 2v7h-4v-7a6 6 0 016-6zM2 9h4v12H2z" />
         <circle cx="4" cy="4" r="2" />
       </svg>
@@ -53,7 +42,7 @@ const SOCIAL_LINKS = [
     label: 'Email',
     href: 'mailto:support@bidwin.in',
     icon: (
-      <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+      <svg className="w-4 h-4" fill="none" stroke="currentColor" strokeWidth="1.8" viewBox="0 0 24 24">
         <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
         <polyline points="22,6 12,13 2,6" />
       </svg>
@@ -65,46 +54,75 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer
-      style={{ background: '#0d0d0d', borderTop: '1px solid rgba(255,255,255,0.06)' }}
-    >
-      <div className="max-w-5xl mx-auto px-4 py-10 flex flex-col items-center gap-6">
+    <footer style={{ background: '#0C0C0E', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+      <div className="max-w-7xl mx-auto px-5 sm:px-8 py-12">
+        <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-10">
 
-        {/* Nav links */}
-        <nav className="flex flex-wrap justify-center gap-x-8 gap-y-2">
-          {NAV_LINKS.map(({ label, to }) => (
-            <Link
-              key={label}
-              to={to}
-              className="text-sm text-[#9CA3AF] hover:text-white transition-colors"
-            >
-              {label}
-            </Link>
-          ))}
-        </nav>
+          {/* Brand */}
+          <div className="flex flex-col gap-4 max-w-xs">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-[#5B5FEF] flex items-center justify-center">
+                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <span className="text-[15px] font-bold text-white">BidWin</span>
+            </div>
+            <p className="text-sm text-[#6B6B78] leading-relaxed">
+              India's fairest live bidding platform. One flat fee, one random winner, zero price wars.
+            </p>
+            {/* Social */}
+            <div className="flex items-center gap-3 mt-1">
+              {SOCIAL.map(({ label, href, icon }) => (
+                <a
+                  key={label}
+                  href={href}
+                  aria-label={label}
+                  className="w-8 h-8 rounded-lg flex items-center justify-center text-[#6B6B78] hover:text-white transition-colors"
+                  style={{ background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.07)' }}
+                >
+                  {icon}
+                </a>
+              ))}
+            </div>
+          </div>
 
-        {/* Divider */}
-        <div className="w-full max-w-xs h-px bg-white/[0.06]" />
+          {/* Links */}
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-semibold text-[#A0A0AB] uppercase tracking-widest">Links</p>
+            {LINKS.map(({ label, to }) => (
+              <Link
+                key={label}
+                to={to}
+                className="text-sm text-[#6B6B78] hover:text-white transition-colors"
+              >
+                {label}
+              </Link>
+            ))}
+          </div>
 
-        {/* Social icons */}
-        <div className="flex items-center gap-5">
-          {SOCIAL_LINKS.map(({ label, href, icon }) => (
+          {/* Contact */}
+          <div className="flex flex-col gap-3">
+            <p className="text-xs font-semibold text-[#A0A0AB] uppercase tracking-widest">Contact</p>
             <a
-              key={label}
-              href={href}
-              aria-label={label}
-              className="text-[#6B7280] hover:text-white transition-colors"
+              href="mailto:support@bidwin.in"
+              className="text-sm text-[#6B6B78] hover:text-white transition-colors"
             >
-              {icon}
+              support@bidwin.in
             </a>
-          ))}
+            <p className="text-sm text-[#6B6B78]">India</p>
+          </div>
         </div>
 
-        {/* Copyright */}
-        <p className="text-sm text-[#6B7280]">
-          © {year} BidWin &nbsp;|&nbsp; All Rights Reserved
-        </p>
-
+        {/* Bottom bar */}
+        <div className="mt-10 pt-6 border-t border-[rgba(255,255,255,0.05)] flex flex-col sm:flex-row items-center justify-between gap-3">
+          <p className="text-xs text-[#6B6B78]">
+            © {year} BidWin. All rights reserved.
+          </p>
+          <p className="text-xs text-[#6B6B78]">
+            Made with care in India 🇮🇳
+          </p>
+        </div>
       </div>
     </footer>
   );

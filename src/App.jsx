@@ -16,6 +16,12 @@ import FavouritesPage from './pages/FavouritesPage';
 import AddProductPage from './pages/AddProductPage';
 import HowItWorksPage from './pages/HowItWorksPage';
 import ContactPage from './pages/ContactPage';
+import ContestListPage from './pages/ContestListPage';
+import ContestDetailPage from './pages/ContestDetailPage';
+import CreateContestPage from './pages/CreateContestPage';
+import WinnerDrawPage from './pages/WinnerDrawPage';
+import TransparencyPage from './pages/TransparencyPage';
+import AdminPage from './pages/AdminPage';
 import { useAuthStore } from './store/authStore';
 import { useFavoritesStore } from './store/favoritesStore';
 
@@ -60,8 +66,37 @@ export default function App() {
             {/* Public */}
             <Route path="/register" element={<RegisterPage />} />
             <Route path="/login" element={<LoginPage />} />
+            <Route path="/how-it-works" element={<HowItWorksPage />} />
+            <Route path="/contact" element={<ContactPage />} />
 
-            {/* Protected */}
+            {/* Transparency — fully public */}
+            <Route path="/transparency" element={<TransparencyPage />} />
+            <Route path="/transparency/:id" element={<TransparencyPage />} />
+
+            {/* Contests — public browse, protected entry */}
+            <Route path="/contests" element={<ContestListPage />} />
+            <Route
+              path="/contests/create"
+              element={
+                <ProtectedRoute>
+                  <CreateContestPage />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="/contests/:id" element={<ContestDetailPage />} />
+            <Route path="/contests/:id/draw" element={<WinnerDrawPage />} />
+
+            {/* Admin */}
+            <Route
+              path="/admin"
+              element={
+                <ProtectedRoute>
+                  <AdminPage />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Protected user pages */}
             <Route
               path="/profile/setup"
               element={
@@ -95,19 +130,15 @@ export default function App() {
               }
             />
 
-            {/* Add product */}
+            {/* Product pages */}
             <Route path="/products/add" element={<AddProductPage />} />
 
-            {/* Public info pages */}
-            <Route path="/how-it-works" element={<HowItWorksPage />} />
-            <Route path="/contact" element={<ContactPage />} />
-
-            {/* Home — full landing page with hero, marketing, products */}
+            {/* Home */}
             <Route path="/" element={<HomePage />} />
             <Route path="/products" element={<Navigate to="/" replace />} />
             <Route path="/products/:id" element={<ProductDetailPage />} />
 
-            {/* 404 fallback */}
+            {/* 404 */}
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </main>

@@ -1,48 +1,57 @@
 import { create } from 'zustand';
-
-const storageKey = (userId) => `favourites_${userId}`;
-
-const loadFromStorage = (userId) => {
-  if (!userId) return [];
-  try {
-    const raw = localStorage.getItem(storageKey(userId));
-    return raw ? JSON.parse(raw) : [];
-  } catch {
-    return [];
-  }
-};
-
-const saveToStorage = (userId, ids) => {
-  if (!userId) return;
-  try {
-    localStorage.setItem(storageKey(userId), JSON.stringify(ids));
-  } catch {
-    // storage full or unavailable — silently ignore
-  }
-};
+import { getFavourites, addFavourite, removeFavourite } from '../api/favourites';
 
 export const useFavoritesStore = create((set, get) => ({
   favoriteIds: [],
-  currentUserId: null,
+  loading: false,
 
-  // Call this when the user logs in / on app load to hydrate the store
-  hydrate: (userId) => {
-    const ids = loadFromStorage(userId);
-    set({ favoriteIds: ids, currentUserId: userId });
+  // Called on login / app load — fetches from backend
+  hydrate: async (userId) => {
+    if (!userId) return;
+    set({ loading: true });
+    try {
+      const { data } = await getFavourites();
+      // Backend returns array of productIds (numbers or strings)
+      const ids = Array.isArray(data) ? data.map(String) : [];
+      set({ favoriteIds: ids });
+    } catch {
+      // Silently fail — user just won't see saved state
+    } finally {
+      set({ loading: false });
+    }
   },
 
-  toggleFavorite: (productId, userId) => {
+  // Optimistic toggle — updates UI instantly, syncs with backend in background
+  toggleFavorite: async (productId) => {
+    const id = String(productId);
     const { favoriteIds } = get();
-    const exists = favoriteIds.includes(productId);
-    const updated = exists
-      ? favoriteIds.filter((id) => id !== productId)
-      : [...favoriteIds, productId];
-    saveToStorage(userId, updated);
-    set({ favoriteIds: updated });
-    return !exists; // true = added, false = removed
+    const exists = favoriteIds.includes(id);
+
+    // Optimistic update
+    set({
+      favoriteIds: exists
+        ? favoriteIds.filter((i) => i !== id)
+        : [...favoriteIds, id],
+    });
+
+    try {
+      if (exists) {
+        await removeFavourite(productId);
+      } else {
+        await addFavourite(productId);
+      }
+    } catch {
+      // Rollback on failure
+      set({ favoriteIds: get().favoriteIds.includes(id)
+        ? get().favoriteIds.filter((i) => i !== id)
+        : [...get().favoriteIds, id],
+      });
+    }
+
+    return !exists; // true = added
   },
 
-  isFavorite: (productId) => get().favoriteIds.includes(productId),
+  isFavorite: (productId) => get().favoriteIds.includes(String(productId)),
 
-  clearFavorites: () => set({ favoriteIds: [], currentUserId: null }),
+  clearFavorites: () => set({ favoriteIds: [] }),
 }));
